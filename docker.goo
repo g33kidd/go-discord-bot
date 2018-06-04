@@ -1,0 +1,100 @@
+// func main() {
+
+// 	// Setup the DiscordGO client instance.
+// 	discord, err := discordgo.New("Bot " + "")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	discord.AddHandler(messageCreate)
+
+// 	err = discord.Open()
+// 	if err != nil {
+// 		fmt.Println("error opening connection,", err)
+// 		return
+// 	}
+
+// 	fmt.Println("Bot is now running!")
+// 	sc := make(chan os.Signal, 1)
+// 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+// 	<-sc
+
+// 	discord.Close()
+// }
+
+// func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+// 	ctx := context.Background()
+// 	cli, err := client.NewEnvClient()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	// Ignore all message by the bot.
+// 	if message.Author.ID == session.State.User.ID {
+// 		return
+// 	}
+
+// 	if message.Content == "$ls" {
+// 		containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+// 		if err != nil {
+// 			panic(err)
+// 		}
+
+// 		numOfContainers := len(containers)
+
+// 		session.ChannelMessageSend(message.ChannelID, "There are this many containers running: "+strconv.Itoa(numOfContainers))
+
+// 		for _, container := range containers {
+// 			session.ChannelMessageSend(message.ChannelID, container.ImageID)
+// 		}
+// 	}
+
+// 	if message.Content == "$alpine" {
+
+// 		reader, err := cli.ImagePull(ctx, "docker.io/library/alpine", types.ImagePullOptions{})
+// 		if err != nil {
+// 			panic(err)
+// 		}
+
+// 		buffer := new(bytes.Buffer)
+// 		buffer.ReadFrom(reader)
+// 		newStr := buffer.String()
+// 		session.ChannelMessageSend(message.ChannelID, newStr)
+
+// 		resp, err := cli.ContainerCreate(ctx, &container.Config{
+// 			Image: "alpine",
+// 			Cmd:   []string{"echo", "I am running in a container! How about dat"},
+// 			Tty:   true,
+// 		}, nil, nil, "")
+// 		if err != nil {
+// 			panic(err)
+// 		}
+
+// 		if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+// 			panic(err)
+// 		}
+
+// 		statusCh, errCh := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
+// 		select {
+// 		case err := <-errCh:
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 		case <-statusCh:
+// 			fmt.Println("It is done!")
+// 		}
+
+// 		out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
+// 		if err != nil {
+// 			panic(err)
+// 		}
+
+// 		buffer = new(bytes.Buffer)
+// 		buffer.ReadFrom(out)
+// 		newStr = buffer.String()
+// 		session.ChannelMessageSend(message.ChannelID, newStr)
+
+// 	}
+
+// }
+// package docker
