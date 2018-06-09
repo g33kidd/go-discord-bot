@@ -3,51 +3,33 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/g33kidd/n00b/discord"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
 	"github.com/joho/godotenv"
 )
-
-const (
-	writeWait      = 10 * time.Second
-	pongWait       = 60 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 1024 * 1024
-)
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  maxMessageSize,
-	WriteBufferSize: maxMessageSize,
-}
 
 const prefix = "$"
 
 func main() {
 
 	// Load our .env file in development.
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file.")
-		log.Fatalln(err)
+	if err := godotenv.Load(); err != nil {
+		log.Fatalln("Error loading .env file.", err)
 		return
 	}
 
-	discordBot := &Bot{}
-	discordBot.Setup()
+	bot := discord.NewBot(os.Getenv("BOT_TOKEN"), prefix)
+	if bot == nil {
+		log.Fatalln("Error setting up discord Bot.")
+		return
+	}
 
-	http.HandleFunc("/", discordBot.serveDashboard)
-	http.HandleFunc("/ws", discordBot.serveWs)
-
-	// go discordBot.runWs()
-	go discordBot.Connect()
-	go http.ListenAndServe(":8000", nil)
-	go discordBot.ReportStatus()
+	go bot.Connect()
 
 	// wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
@@ -56,5 +38,5 @@ func main() {
 	<-sc
 
 	// cleanly close down the discord connection
-	discordBot.Close()
+	bot.Disconnect()
 }

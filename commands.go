@@ -1,77 +1,76 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	dgo "github.com/bwmarrin/discordgo"
+	"github.com/g33kidd/n00b/discord"
+	"github.com/g33kidd/n00b/twitch"
 )
 
-func setupCommands(ch *CommandHandler) {
-	testCommand := &Command{
+func setupCommands(ch *discord.CommandHandler) {
+	testCommand := &discord.Command{
 		Signature:   "test",
 		Description: "Does a thing!",
 		Handler:     testCommandHandler,
 	}
 
-	concurrencyTest := &Command{
+	concurrencyTest := &discord.Command{
 		Signature:   "c",
 		Description: "Testing some goroutine stuff!",
 		Handler:     concurrencyTestHandler,
 	}
 
-	twitchCommand := &Command{
+	twitchCommand := &discord.Command{
 		Signature:   "twitch-edit",
 		Description: "Does another thing!",
 		Handler:     twitchChannelEditCommand,
 	}
 
-	pingCommand := &Command{
+	pingCommand := &discord.Command{
 		Signature:   "ping",
 		Description: "Ping pong!",
 		Handler:     pingPongHandler,
 	}
 
-	pongCommand := &Command{
+	pongCommand := &discord.Command{
 		Signature:   "pong",
 		Description: "Ping pong!",
 		Handler:     pingPongHandler,
 	}
 
-	randomCatCommand := &Command{
+	randomCatCommand := &discord.Command{
 		Signature:   "cat",
 		Description: "Gives a random cat image!",
 		Handler:     catCommandHandler,
 	}
 
-	testCommand.AddParam(&CommandParameter{
+	testCommand.AddParam(&discord.CommandParameter{
 		Name:        "name",
 		Description: "Sets the name of test",
 		Position:    0,
 		Required:    true,
 	})
 
-	testCommand.AddParam(&CommandParameter{
+	testCommand.AddParam(&discord.CommandParameter{
 		Name:        "something",
 		Description: "Does the something",
 		Position:    1,
 		Required:    true,
 	})
 
-	twitchCommand.AddParam(&CommandParameter{
+	twitchCommand.AddParam(&discord.CommandParameter{
 		Name:        "game",
 		Description: "Sets the game for the twitch stream",
 		Position:    0,
 		Required:    true,
 	})
 
-	twitchCommand.AddParam(&CommandParameter{
+	twitchCommand.AddParam(&discord.CommandParameter{
 		Name:        "title",
 		Description: "Sets the title for the twitch stream",
 		Position:    1,
@@ -86,7 +85,7 @@ func setupCommands(ch *CommandHandler) {
 	ch.AddCommand(pongCommand)
 }
 
-func testCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+func testCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
 	nameP, err := c.GetParam(m.Content, "name")
 	if err != nil {
 		fmt.Println(err)
@@ -100,58 +99,9 @@ func testCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
 	s.ChannelMessageSend(m.ChannelID, somethingP)
 }
 
-func getChannel() *twitchChannel {
-	client := &http.Client{}
-	// TODO: pass in the channel id after getting the channel id!
-	req, err := http.NewRequest("GET", "https://api.twitch.tv/kraken/channel", nil)
-	req.Header.Add("Accept", "application/vnd.twitchtv.v5+json")
-	req.Header.Add("Authorization", "OAuth "+os.Getenv("TWITCH_OAUTH"))
-	req.Header.Add("Client-ID", os.Getenv("TWITCH_CLIENT_ID"))
-	resp, err := client.Do(req)
-	if err != nil {
-		// TODO: dont panic!
-		panic(err)
-	}
-	defer resp.Body.Close()
-	ch := &twitchChannel{}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	json.Unmarshal(data, ch)
-	return ch
-}
+func twitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
 
-func updateChannel(channelID string, game string, status string) error {
-	update := &channelUpdate{
-		Channel: channel{
-			Status: status,
-			Game:   game,
-		},
-	}
-
-	jb, _ := json.Marshal(update)
-
-	client := &http.Client{}
-	req, err := http.NewRequest("PUT", "https://api.twitch.tv/kraken/channels/"+channelID, bytes.NewBuffer(jb))
-	req.Header.Add("Accept", "application/vnd.twitchtv.v5+json")
-	req.Header.Add("Authorization", "OAuth "+os.Getenv("TWITCH_OAUTH"))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Client-ID", os.Getenv("TWITCH_CLIENT_ID"))
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return nil
-}
-
-func twitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
-
-	ch := getChannel()
-	fmt.Println(ch.Status)
-	fmt.Println(ch.Game)
+	ch := twitch.GetMyChannel()
 
 	game, err := c.GetParam(m.Content, "game")
 	if err != nil {
@@ -165,7 +115,12 @@ func twitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *Command) 
 		return
 	}
 
-	if update := updateChannel(ch.ID, game, title); update != nil {
+	chUpdate := &twitch.TwitchChannelEditData{
+		Game:   game,
+		Status: title,
+	}
+
+	if update := twitch.UpdateChannel(ch.ID, chUpdate); update != nil {
 		s.ChannelMessageSend(m.ChannelID, "Something did not go as planned!")
 	} else {
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("I set the game to **%s** and the title to **%s**", game, title))
@@ -182,7 +137,7 @@ func timer(d time.Duration) <-chan int {
 }
 
 // TODO: come back to this!
-func concurrencyTestHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+func concurrencyTestHandler(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
 	for i := 0; i < 5; i++ {
 		c := timer(3 * time.Second)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%d", i))
@@ -191,7 +146,7 @@ func concurrencyTestHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
 	s.ChannelMessageSend(m.ChannelID, "ch finished")
 }
 
-func catCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+func catCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
 	resp, err := http.Get("http://thecatapi.com/api/images/get?format=xml&results_per_page=1")
 	if err != nil {
 		fmt.Println("Didnt get cat image!")
@@ -213,15 +168,10 @@ func catCommandHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
 	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Found the image you wanted! Here! %s", cat.URL))
 }
 
-func pingPongHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+func pingPongHandler(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
 	if c.Signature == "pong" {
 		s.ChannelMessageSend(m.ChannelID, "Ping!")
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
 	}
 }
-
-// TODO: Access to commandHandler in here? Yes/no?
-// func conversationHandler(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
-// 		ch.AddConversation()
-// }

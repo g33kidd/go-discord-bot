@@ -1,4 +1,4 @@
-package main
+package discord
 
 import (
 	"errors"
@@ -145,7 +145,7 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 	vm := otto.New()
 	vm.Set("botToken", "Nice try! No bot tokens here!")
 	vm.Set("discordLog", func(call otto.FunctionCall) otto.Value {
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("`%s`", call.Argument(0).String()))
+		s.ChannelMessageSend(m.ChannelID, call.Argument(0).String())
 		return otto.Value{}
 	})
 

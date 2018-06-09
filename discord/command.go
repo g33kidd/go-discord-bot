@@ -1,10 +1,12 @@
-package main
+package discord
 
 import (
 	"errors"
 	"fmt"
 	"strings"
 )
+
+const prefix = "$"
 
 // NewCommand creates a new command and returns it!
 func NewCommand(sig string, desc string, handler commandHandlerFunc) *Command {
