@@ -29,6 +29,7 @@ func main() {
 		return
 	}
 
+	setupCommands(bot.CmdHandler)
 	go bot.Connect()
 
 	// wait here until CTRL-C or other term signal is received.
