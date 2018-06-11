@@ -15,6 +15,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// TODO: get rid of this and just use the prefix set by the guild.
+// By default a guild prefix should be ! or $.
 const prefix = "$"
 
 func main() {
@@ -37,6 +39,7 @@ func main() {
 	cmds.RegisterImageCommands(bot)
 	cmds.RegisterUtilityCommands(bot)
 	cmds.RegisterTestingCommands(bot)
+
 	go bot.Connect()
 
 	// wait here until CTRL-C or other term signal is received.
