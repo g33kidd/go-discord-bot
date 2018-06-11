@@ -65,7 +65,6 @@ func (b *Bot) Disconnect() {
 }
 
 func (b *Bot) messageCreate(s *dgo.Session, m *dgo.MessageCreate) {
-	// TODO: Better logging for all events!
 	logMessageCreate(s, m)
 
 	// NOTE: This is for the websocket stuff ->
@@ -107,7 +106,6 @@ func (b *Bot) guildMemberAdd(s *dgo.Session, m *dgo.GuildMemberAdd) {
 	fmt.Println("somebody joined the guild!")
 }
 
-// TODO: Colors!
 func logMessageCreate(s *dgo.Session, m *dgo.MessageCreate) {
 	ch, err := s.State.Channel(m.ChannelID)
 	if err != nil {

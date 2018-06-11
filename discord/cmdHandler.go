@@ -18,64 +18,53 @@ func NewCommandHandler(Prefix string) *CommandHandler {
 	}
 
 	// TODO: does this really need to be in here?
-	helpCommand := &Command{
-		Signature:   "help",
-		Description: "Help meeeeee!",
-		Handler: func(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
-			cmdHelp, err := c.GetParam(m.Content, "command")
+	helpCommand := NewCommand("help", "Displays help messages.", func(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+		cmdHelp, _ := c.GetParam(m.Content, "command")
+
+		if cmdHelp != "" {
+			foundCmd, err := cmdh.FindCommand(cmdHelp, false)
 			if err != nil {
-				fmt.Println("Something happened")
-				fmt.Println(err)
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s", err))
+				return
 			}
 
-			if cmdHelp != "" {
-				foundCmd, err := cmdh.FindCommand(cmdHelp, false)
-				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s", err))
-					return
+			embed := &dgo.MessageEmbed{
+				Description: foundCmd.Description,
+				Title:       foundCmd.HelpString(),
+			}
+
+			for _, p := range foundCmd.Parameters {
+				field := &dgo.MessageEmbedField{
+					Name:  p.Name,
+					Value: p.Description,
 				}
 
-				embed := &dgo.MessageEmbed{
-					Description: foundCmd.Description,
-					Title:       foundCmd.HelpString(),
-				}
+				embed.Fields = append(embed.Fields, field)
+			}
 
-				for _, p := range foundCmd.Parameters {
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		} else {
+			embed := &dgo.MessageEmbed{
+				Description: "HEEEEELPP!",
+				Title:       "This is a help message!",
+			}
+
+			for _, cmd := range cmdh.Commands {
+				if cmd.Description != "" && cmd.Signature != "" {
 					field := &dgo.MessageEmbedField{
-						Name:  p.Name,
-						Value: p.Description,
+						Name:   cmd.HelpString(),
+						Value:  cmd.Description,
+						Inline: false,
 					}
-
 					embed.Fields = append(embed.Fields, field)
 				}
-
-				s.ChannelMessageSendEmbed(m.ChannelID, embed)
-			} else {
-				embed := &dgo.MessageEmbed{
-					Description: "HEEEEELPP!",
-					Title:       "This is a help message!",
-				}
-
-				for _, cmd := range cmdh.Commands {
-					if cmd.Description != "" && cmd.Signature != "" {
-						field := &dgo.MessageEmbedField{
-							Name:   cmd.HelpString(),
-							Value:  cmd.Description,
-							Inline: false,
-						}
-						embed.Fields = append(embed.Fields, field)
-					}
-				}
-
-				s.ChannelMessageSendEmbed(m.ChannelID, embed)
 			}
-		},
-	}
 
-	helpCommand.AddParam(&CommandParameter{
-		Name:        "command",
-		Description: "Gets the help for this command only!",
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		}
 	})
+
+	helpCommand.AddParameter("command", "Gets the help message for the command given, if there is one.", false)
 
 	cmdh.AddCommand(helpCommand)
 	return cmdh
