@@ -61,6 +61,18 @@ func (c *Command) AddParam(param *CommandParameter) {
 	c.Parameters = append(c.Parameters, param)
 }
 
+// AddParameter adds a new parameter to the command.
+// Parameters should be added in order.
+func (c *Command) AddParameter(name string, description string, required bool) {
+	param := &CommandParameter{
+		Name:        name,
+		Description: description,
+		Position:    len(c.Parameters) + 1,
+		Required:    required,
+	}
+	c.Parameters = append(c.Parameters, param)
+}
+
 // HelpString returns a string of how this Command is used.
 func (c *Command) HelpString() string {
 	parts := make([]string, 0)

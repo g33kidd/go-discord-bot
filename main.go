@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	cmds "github.com/g33kidd/n00b/commands"
+
 	"github.com/g33kidd/n00b/discord"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
@@ -29,7 +31,12 @@ func main() {
 		return
 	}
 
-	setupCommands(bot.CmdHandler)
+	cmds.RegisterRandomCommands(bot)
+	cmds.RegisterTwitchCommands(bot)
+	cmds.RegisterFunCommands(bot)
+	cmds.RegisterImageCommands(bot)
+	cmds.RegisterUtilityCommands(bot)
+	cmds.RegisterTestingCommands(bot)
 	go bot.Connect()
 
 	// wait here until CTRL-C or other term signal is received.
