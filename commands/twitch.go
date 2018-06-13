@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strconv"
 
 	dgo "github.com/bwmarrin/discordgo"
 
@@ -35,4 +36,36 @@ func TwitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.C
 	} else {
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("I set the game to **%s** and the title to **%s**", game, title))
 	}
+}
+
+// TwitchChannelInfoCommand edits the twitch channel!
+func TwitchChannelInfoCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
+	channel, err := c.GetParam(m.Content, "channel")
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "I need the `channel` param. Try `$help twitch` for more info.")
+		return
+	}
+
+	user := twitch.GetUser(channel)
+	if user == nil {
+		s.ChannelMessageSend(m.ChannelID, "could not find that channel.")
+		return
+	}
+
+	cinfo := twitch.GetChannel(user.ID)
+	if cinfo == nil {
+		s.ChannelMessageSend(m.ChannelID, "Something's not right.")
+		return
+	}
+
+	fmt.Println(cinfo)
+
+	embed := &dgo.MessageEmbed{}
+	embed.Title = fmt.Sprintf("%s's Channel", cinfo.DisplayName)
+
+	color, _ := strconv.ParseInt("228B22", 16, 64)
+
+	embed.Color = int(color)
+
+	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 }

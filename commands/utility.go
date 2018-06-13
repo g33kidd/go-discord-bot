@@ -1,7 +1,20 @@
 package commands
 
+import (
+	dgo "github.com/bwmarrin/discordgo"
+	dc "github.com/g33kidd/n00b/discord"
+)
+
 // HelpCommand helps the user
 // TODO: Figure out how this can go here
+
+func HelpCommand(b *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+
+}
+
+func BanCommand(b *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+	b.ChannelMessageSend(m.ChannelID, "test")
+}
 
 // func HelpCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 // 	cmdHelp, err := c.GetParam(m.Content, "command")

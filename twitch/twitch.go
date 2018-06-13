@@ -53,14 +53,14 @@ func GetUsers(logins []string) []*TwitchUser {
 }
 
 // GetStream gets the stream for a channel if it is online.
-func GetStream(channelID string) *TwitchStream {
+func GetStream(channelID string) *TwitchStreamData {
 	s := &TwitchStream{}
 	data, err := MakeRequest("GET", "streams/"+channelID, nil)
 	if err != nil {
 		panic(err)
 	}
 	json.Unmarshal(data, s)
-	return s
+	return s.Data
 }
 
 // GetMyChannel gets the channel from OAuth token
@@ -77,7 +77,7 @@ func GetMyChannel() *TwitchChannel {
 // GetChannel returns a TwitchChannel given a channelID
 func GetChannel(channelID string) *TwitchChannel {
 	c := &TwitchChannel{}
-	data, err := MakeRequest("GET", "channel/"+channelID, nil)
+	data, err := MakeRequest("GET", "channels/"+channelID, nil)
 	if err != nil {
 		panic(err)
 	}

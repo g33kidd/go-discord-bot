@@ -1,5 +1,6 @@
 package twitch
 
+// TODO: Add more fields to this...
 type TwitchChannel struct {
 	Status      string `json:"status"`
 	Game        string `json:"game"`
@@ -19,7 +20,7 @@ type TwitchChannelEdit struct {
 }
 
 type TwitchStream struct {
-	Data *TwitchStreamData `json:"stream"`
+	Data *TwitchStreamData `json:"stream,omitempty"`
 }
 
 type TwitchStreamPreview struct {

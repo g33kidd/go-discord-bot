@@ -72,6 +72,7 @@ func NewCommandHandler(Prefix string) *CommandHandler {
 
 // AddCommand adds a command to the command handler.
 func (ch *CommandHandler) AddCommand(cmd *Command) {
+	cmd.Prefix = ch.Prefix
 	ch.Commands = append(ch.Commands, cmd)
 }
 
@@ -109,6 +110,7 @@ func (ch *CommandHandler) FindCommand(content string, withPrefix bool) (c *Comma
 // MaybeHandleCodeBlock takes a string and figures out if it's in a codeblock format.
 // TODO: figure out what language is being passed in. ```js <- js should be the language.
 // TODO: Have a separate Handler for each language that is supported.
+// TODO: Can an API be generalized for creating Maybe handlers?
 func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCreate) (r string, err error) {
 	codeBlockStart := strings.HasPrefix(m.Content, "```")
 	codeBlockEnd := strings.HasSuffix(m.Content, "```")

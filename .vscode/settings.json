@@ -1,4 +1,4 @@
 {
-  "discord.enabled": true,
+  "discord.enabled": false,
   "editor.tabSize": 4,
 }

@@ -10,7 +10,14 @@ func RegisterTwitchCommands(bot *dc.Bot) {
 	twitchEdit.AddParameter("game", "The new game for twitch channel.", true)
 	twitchEdit.AddParameter("title", "The new title for twitch channel.", true)
 
+	channel := dc.NewCommand("twitch", "Gets information for a twitch channel.", TwitchChannelInfoCommand)
+	channel.AddParameter("channel", "The channel to get info for.", true)
+
+	// twitchGroup := dc.NewCommandGroup("twitch", "Does stuff")
+	// twitchGroup.AddCommand(twitchEdit)
+
 	bot.CmdHandler.AddCommand(twitchEdit)
+	bot.CmdHandler.AddCommand(channel)
 }
 
 // RegisterFunCommands registers the fun command group
@@ -25,7 +32,7 @@ func RegisterImageCommands(bot *dc.Bot) {
 
 // RegisterUtilityCommands registers the fun command group
 func RegisterUtilityCommands(bot *dc.Bot) {
-
+	// Things like /ban /kick, etc..
 }
 
 // RegisterTestingCommands for testing stuff

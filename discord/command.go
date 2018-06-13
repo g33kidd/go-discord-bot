@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-const prefix = "$"
-
 // NewCommand creates a new command and returns it!
 func NewCommand(sig string, desc string, handler commandHandlerFunc) *Command {
 	cmd := &Command{}
@@ -53,7 +51,7 @@ func ParseParams(content string) []string {
 
 // SignatureWithPrefix returns a concatenated string with prefix and signature
 func (c *Command) SignatureWithPrefix() string {
-	return fmt.Sprintf("%s%s", prefix, c.Signature)
+	return fmt.Sprintf("%s%s", c.Prefix, c.Signature)
 }
 
 // AddParam adds a param to a command.
@@ -128,7 +126,7 @@ func (c *Command) GetParam(content string, name string) (pr string, err error) {
 	}
 
 	for pos, s := range parsed {
-		if pos == param.Position {
+		if pos == param.Position-1 {
 			pr = FormatParamString(s)
 			err = nil
 			foundMatchingParam = true
