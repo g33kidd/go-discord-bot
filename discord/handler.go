@@ -1,12 +1,12 @@
 package discord
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"strings"
 
 	dgo "github.com/bwmarrin/discordgo"
-	"github.com/robertkrimen/otto"
 )
 
 // NewCommandHandler creates a new CommandHandler with Prefix and sets up the default commands.
@@ -111,12 +111,12 @@ func (ch *CommandHandler) FindCommand(content string, withPrefix bool) (c *Comma
 // TODO: figure out what language is being passed in. ```js <- js should be the language.
 // TODO: Have a separate Handler for each language that is supported.
 // TODO: Can an API be generalized for creating Maybe handlers?
-func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCreate) (r string, err error) {
-	codeBlockStart := strings.HasPrefix(m.Content, "```")
-	codeBlockEnd := strings.HasSuffix(m.Content, "```")
+// TODO: Create a handler for a specific language. Do something!!!!
+func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCreate) (res string, err error) {
+	content := m.Content
+	scanner := bufio.NewScanner(strings.NewReader(content))
 
-	// Remove the backticks from the message. It would mess up the eval if we didn't!
-	f := func(r rune) bool {
+	tickTrimFunc := func(r rune) bool {
 		switch {
 		case r == '`':
 			return true
@@ -125,38 +125,81 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 		}
 	}
 
-	if !codeBlockStart && !codeBlockEnd {
-		r = ""
-		err = errors.New("did not find a code block")
+	// check if this really is a code block.
+	start := strings.HasPrefix(content, "```")
+	end := strings.HasSuffix(content, "```")
+	if !start && !end {
+		res = ""
+		err = errors.New("was not a code block")
 		return
 	}
 
-	// Setup the Otto VM and add a function called `discordLog` that can be used in the JS code.
-	// TODO: this https://godoc.org/github.com/robertkrimen/otto#hdr-Halting_Problem
-	vm := otto.New()
-	vm.Set("botToken", "Nice try! No bot tokens here!")
-	vm.Set("discordLog", func(call otto.FunctionCall) otto.Value {
-		s.ChannelMessageSend(m.ChannelID, call.Argument(0).String())
-		return otto.Value{}
-	})
+	// figure out what language this is, or if any is set.
+	firstLine := true
+	var language string
+	for scanner.Scan() {
+		line := scanner.Text()
 
-	// Evaluate the code given in the code block and get a Value
-	trimmedCodeBlock := strings.TrimFunc(m.Content, f)
-	val, err := vm.Eval(trimmedCodeBlock)
-	if err != nil {
-		if val.IsUndefined() {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Something went wrong when evaluating your code! Here's what happened:\n```%s```", err))
-		} else {
-			s.ChannelMessageSend(m.ChannelID, "I don't know what happened. Sorry!")
+		if !firstLine {
+			fmt.Println("not first line...")
+			break
 		}
 
-		return
+		if strings.HasPrefix(line, "```") && strings.HasSuffix(line, "```") && len(line) > 3 {
+			res = "Codeblock should be formatted properly.\nNewline after start and before end block ticks."
+			return
+		}
+
+		language = strings.TrimFunc(line, tickTrimFunc)
+
+		fmt.Printf("%s\n", line)
+
+		firstLine = false
 	}
 
-	// Try to get that Value as a string.
-	r, err = val.ToString()
+	// remove the back ticks.
+	blockText := strings.TrimFunc(content, tickTrimFunc)
+	blockText = strings.Trim(blockText, language)
 
-	return
+	return fmt.Sprintf("language was **%s**\ntext was\n```%s\n%s\n```", language, language, blockText), nil
+
+	// codeBlockStart := strings.HasPrefix(m.Content, "```")
+	// codeBlockEnd := strings.HasSuffix(m.Content, "```")
+
+	// // Remove the backticks from the message. It would mess up the eval if we didn't!
+
+	// if !codeBlockStart && !codeBlockEnd {
+	// 	r = ""
+	// 	err = errors.New("did not find a code block")
+	// 	return
+	// }
+
+	// // Setup the Otto VM and add a function called `discordLog` that can be used in the JS code.
+	// // TODO: this https://godoc.org/github.com/robertkrimen/otto#hdr-Halting_Problem
+	// vm := otto.New()
+	// vm.Set("botToken", "Nice try! No bot tokens here!")
+	// vm.Set("discordLog", func(call otto.FunctionCall) otto.Value {
+	// 	s.ChannelMessageSend(m.ChannelID, call.Argument(0).String())
+	// 	return otto.Value{}
+	// })
+
+	// // Evaluate the code given in the code block and get a Value
+	// trimmedCodeBlock := strings.TrimFunc(m.Content, f)
+	// val, err := vm.Eval(trimmedCodeBlock)
+	// if err != nil {
+	// 	if val.IsUndefined() {
+	// 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Something went wrong when evaluating your code! Here's what happened:\n```%s```", err))
+	// 	} else {
+	// 		s.ChannelMessageSend(m.ChannelID, "I don't know what happened. Sorry!")
+	// 	}
+
+	// 	return
+	// }
+
+	// // Try to get that Value as a string.
+	// r, err = val.ToString()
+
+	// return
 }
 
 func (ch *CommandHandler) startConversation(id string) {

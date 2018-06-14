@@ -90,7 +90,7 @@ func (b *Bot) messageCreate(s *dgo.Session, m *dgo.MessageCreate) {
 
 	cb, err := b.CmdHandler.MaybeHandleCodeBlock(s, m)
 	if err == nil {
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("```\n%s\n```\nis the result", cb))
+		s.ChannelMessageSend(m.ChannelID, cb)
 		return
 	}
 
