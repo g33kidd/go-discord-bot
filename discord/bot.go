@@ -74,6 +74,14 @@ func (b *Bot) messageCreate(s *dgo.Session, m *dgo.MessageCreate) {
 	// 	c.sendJSON <- m.Author
 	// }
 
+	context := &MessageContext{
+		Bot:     b,
+		Session: s,
+		Message: m,
+	}
+
+	log.Println(context)
+
 	content := m.Content
 
 	/// Do not respond to self, or any other bot messages.
@@ -84,6 +92,8 @@ func (b *Bot) messageCreate(s *dgo.Session, m *dgo.MessageCreate) {
 	cmd, err := b.CmdHandler.FindCommand(content, true)
 	if err == nil {
 		// TODO: instead of H(s, m, cmd) do H(bot, m, cmd) because bot already has a session.
+		context.Command = cmd
+		// TODO eventually pass in the context here..
 		cmd.Handler(s, m, cmd)
 		return
 	}

@@ -162,6 +162,8 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 	blockText := strings.TrimFunc(content, tickTrimFunc)
 	blockText = strings.Trim(blockText, language)
 
+	// log.Printf("language was **%s**\ntext was\n```%s\n%s\n```", language, language, blockText)
+
 	// return fmt.Sprintf("language was **%s**\ntext was\n```%s\n%s\n```", language, language, blockText), nil
 
 	// codeBlockStart := strings.HasPrefix(m.Content, "```")
@@ -173,6 +175,12 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 	// 	r = ""
 	// 	err = errors.New("did not find a code block")
 	// 	return
+	// }
+
+	// So basically do this for each language that might be supported with this feature:
+	// switch (language) {
+	// case "js":
+
 	// }
 
 	// // Setup the Otto VM and add a function called `discordLog` that can be used in the JS code.

@@ -20,6 +20,14 @@ type CommandHandler struct {
 	Conversations []*Conversation
 }
 
+// MessageContext is usually just for when Command handlers are being run, but this could be used for different things.
+type MessageContext struct {
+	Session *dgo.Session
+	Bot     *Bot
+	Message *dgo.MessageCreate
+	Command *Command
+}
+
 // Command : this is a command...
 type Command struct {
 	Signature   string

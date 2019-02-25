@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/aymerick/raymond"
+
 	cmds "github.com/g33kidd/n00b/commands"
 
 	"github.com/g33kidd/n00b/discord"
@@ -84,5 +86,18 @@ func serveDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%s", f)
+	// This most likely wont just be strings soon..
+	ctx := map[string]string{
+		"title": "Just testing",
+		"body":  "Just testing this also",
+	}
+
+	tmpl, err := raymond.Render(string(f), ctx)
+	if err != nil {
+		fmt.Println("Whoops...")
+		return
+	}
+
+	fmt.Fprintf(w, "%s", tmpl)
+	return
 }
