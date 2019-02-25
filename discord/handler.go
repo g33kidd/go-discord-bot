@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	dgo "github.com/bwmarrin/discordgo"
+	"github.com/robertkrimen/otto"
 )
 
 // NewCommandHandler creates a new CommandHandler with Prefix and sets up the default commands.
@@ -161,7 +162,7 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 	blockText := strings.TrimFunc(content, tickTrimFunc)
 	blockText = strings.Trim(blockText, language)
 
-	return fmt.Sprintf("language was **%s**\ntext was\n```%s\n%s\n```", language, language, blockText), nil
+	// return fmt.Sprintf("language was **%s**\ntext was\n```%s\n%s\n```", language, language, blockText), nil
 
 	// codeBlockStart := strings.HasPrefix(m.Content, "```")
 	// codeBlockEnd := strings.HasSuffix(m.Content, "```")
@@ -176,30 +177,30 @@ func (ch *CommandHandler) MaybeHandleCodeBlock(s *dgo.Session, m *dgo.MessageCre
 
 	// // Setup the Otto VM and add a function called `discordLog` that can be used in the JS code.
 	// // TODO: this https://godoc.org/github.com/robertkrimen/otto#hdr-Halting_Problem
-	// vm := otto.New()
-	// vm.Set("botToken", "Nice try! No bot tokens here!")
-	// vm.Set("discordLog", func(call otto.FunctionCall) otto.Value {
-	// 	s.ChannelMessageSend(m.ChannelID, call.Argument(0).String())
-	// 	return otto.Value{}
-	// })
+	vm := otto.New()
+	vm.Set("botToken", "Nice try! No bot tokens here!")
+	vm.Set("discordLog", func(call otto.FunctionCall) otto.Value {
+		s.ChannelMessageSend(m.ChannelID, call.Argument(0).String())
+		return otto.Value{}
+	})
 
 	// // Evaluate the code given in the code block and get a Value
 	// trimmedCodeBlock := strings.TrimFunc(m.Content, f)
-	// val, err := vm.Eval(trimmedCodeBlock)
-	// if err != nil {
-	// 	if val.IsUndefined() {
-	// 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Something went wrong when evaluating your code! Here's what happened:\n```%s```", err))
-	// 	} else {
-	// 		s.ChannelMessageSend(m.ChannelID, "I don't know what happened. Sorry!")
-	// 	}
+	val, err := vm.Eval(blockText)
+	if err != nil {
+		if val.IsUndefined() {
+			res = fmt.Sprintf("Something went wrong when evaluating your code! Here's what happened:\n```%s```", err)
+		} else {
+			res = "I don't know what happened. Sorry!"
+		}
 
-	// 	return
-	// }
+		return
+	}
 
 	// // Try to get that Value as a string.
-	// r, err = val.ToString()
+	res, err = val.ToString()
 
-	// return
+	return
 }
 
 func (ch *CommandHandler) startConversation(id string) {

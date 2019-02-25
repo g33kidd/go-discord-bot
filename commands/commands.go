@@ -25,6 +25,16 @@ func RegisterFunCommands(bot *dc.Bot) {
 
 }
 
+// RegisterSpacexCommands registers the spacex commands group
+func RegisterSpacexCommands(bot *dc.Bot) {
+	nextLaunch := dc.NewCommand("nextlaunch", "When is the next SpaceX launch?", NextLaunchCommand)
+	rocketInfo := dc.NewCommand("rocket", "Get some basic information about a SpaceX Rocket!", RocketInformationCommand)
+	rocketInfo.AddParameter("name", "Name of the rocket... with lowercase and no spaces.. Try: falcon9", true)
+
+	bot.CmdHandler.AddCommand(nextLaunch)
+	bot.CmdHandler.AddCommand(rocketInfo)
+}
+
 // RegisterImageCommands registers the fun command group
 func RegisterImageCommands(bot *dc.Bot) {
 
@@ -53,7 +63,7 @@ func RegisterRandomCommands(bot *dc.Bot) {
 
 	randomCat := dc.NewCommand("cat", "Random cat anyone?", RandomCatCommand)
 
-	api := dc.NewCommand("api", "Makes a GET request to a JSON API and shows the content.", ApiCommand)
+	api := dc.NewCommand("api", "Makes a GET request to a JSON API and shows the content.", APICommand)
 	api.AddParameter("url", "The URL to make a request to.", true)
 
 	bot.CmdHandler.AddCommand(api)

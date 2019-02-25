@@ -10,7 +10,6 @@ import (
 	"syscall"
 
 	cmds "github.com/g33kidd/n00b/commands"
-	"github.com/g33kidd/n00b/services"
 
 	"github.com/g33kidd/n00b/discord"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -30,19 +29,24 @@ func main() {
 		return
 	}
 
+	// Creates a new bot instance of DiscordGo
 	bot := discord.NewBot(os.Getenv("BOT_TOKEN"), prefix)
 	if bot == nil {
 		log.Fatalln("Error setting up discord Bot.")
 		return
 	}
 
+	// Register all the different commands for the bot...
+	// TODO is there a better way to package all these commands without doing something like this?
 	cmds.RegisterRandomCommands(bot)
 	cmds.RegisterTwitchCommands(bot)
 	cmds.RegisterFunCommands(bot)
 	cmds.RegisterImageCommands(bot)
 	cmds.RegisterUtilityCommands(bot)
 	cmds.RegisterTestingCommands(bot)
+	cmds.RegisterSpacexCommands(bot)
 
+	// Dashboard stuff for handling real-time updates and the admin dashboard.
 	hub := &wsHub{
 		Bot:        bot,
 		register:   make(chan *wsClient),
@@ -54,10 +58,14 @@ func main() {
 	http.HandleFunc("/", serveDashboard)
 	http.HandleFunc("/ws", hub.handle)
 
+	// All the goroutines, this stuff is running at the same time btw..
 	go hub.run(bot)
 	go http.ListenAndServe(":8000", nil)
 	go bot.Connect()
-	go services.TwitchLiveAlerts(bot)
+
+	// TODO this shit can be turned off after starting the bot once..
+	// Need a database before keeping this all the time.
+	// go services.TwitchLiveAlerts(bot)
 
 	// wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")

@@ -48,8 +48,8 @@ func RandomCatCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Found the image you wanted! Here! %s", cat.URL))
 }
 
-// ApiCommand does ping and pong!
-func ApiCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+// APICommand does ping and pong!
+func APICommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 	client := &http.Client{}
 	url, err := c.GetParam(m.Content, "url")
 	if err != nil {

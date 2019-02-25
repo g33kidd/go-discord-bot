@@ -71,6 +71,10 @@ func (c *Command) AddParameter(name string, description string, required bool) {
 	c.Parameters = append(c.Parameters, param)
 }
 
+func (c *Command) HelpUsage() string {
+	return fmt.Sprintf("%shelp %s", c.Prefix, c.Signature)
+}
+
 // HelpString returns a string of how this Command is used.
 func (c *Command) HelpString() string {
 	parts := make([]string, 0)
@@ -135,8 +139,21 @@ func (c *Command) GetParam(content string, name string) (pr string, err error) {
 	}
 
 	if param.Required && !foundMatchingParam {
-		err = errors.New("required parameter was not found")
+		helpUsage := c.HelpUsage()
+		// this error message really shouldnt be directed towards the user, but eh.. this is the only way I could really figure out how for now.
+		err = fmt.Errorf("could not find required parameter `%s`. To see required parameters, check `%s`", param.Name, helpUsage)
 		return
+	}
+
+	return
+}
+
+// GetRequiredParam
+// TODO actually not really sure where I was going with this. Something about sending a response back to the user..
+func (c *Command) GetRequiredParam(content string, name string) (pr string, err error) {
+	pr, err = c.GetParam(content, name)
+	if err != nil {
+
 	}
 
 	return

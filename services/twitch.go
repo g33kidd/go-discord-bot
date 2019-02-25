@@ -18,6 +18,8 @@ var streams map[string]*twitchStream
 // TODO: Move these to database
 var channels = []string{"g33kidd", "pixelogicdev", "neoplatonist", "naysayer88"}
 
+// With this, need to check whether or not an announcement has already been made...
+
 // TwitchLiveAlerts checks to see if a twitch channel recently went live and then sends a message to the discord channel.
 func TwitchLiveAlerts(b *discord.Bot) {
 	streams = make(map[string]*twitchStream, 0)
