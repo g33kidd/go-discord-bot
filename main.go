@@ -87,7 +87,7 @@ func serveDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// This most likely wont just be strings soon..
-	ctx := map[string]string{
+	ctx := map[string]interface{}{
 		"title": "Just testing",
 		"body":  "Just testing this also",
 	}

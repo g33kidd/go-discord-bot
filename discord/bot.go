@@ -94,7 +94,7 @@ func (b *Bot) messageCreate(s *dgo.Session, m *dgo.MessageCreate) {
 		// TODO: instead of H(s, m, cmd) do H(bot, m, cmd) because bot already has a session.
 		context.Command = cmd
 		// TODO eventually pass in the context here..
-		cmd.Handler(s, m, cmd)
+		cmd.Handler(context)
 		return
 	}
 

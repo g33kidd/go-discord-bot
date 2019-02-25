@@ -7,11 +7,12 @@ import (
 
 // HelpCommand helps the user
 // TODO: Figure out how this can go here
-
+// TODO: Okay this can go here now since we have a full context of this current message and command usage.
 func HelpCommand(b *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 
 }
 
+// BanCommand allows an administrator to ban a user.
 func BanCommand(b *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 	b.ChannelMessageSend(m.ChannelID, "test")
 }

@@ -19,7 +19,12 @@ func NewCommandHandler(Prefix string) *CommandHandler {
 	}
 
 	// TODO: does this really need to be in here?
-	helpCommand := NewCommand("help", "Displays help messages.", func(s *dgo.Session, m *dgo.MessageCreate, c *Command) {
+	// TODO: does this really need to be in here?
+	// TODO: does this really need to be in here?
+	// TODO: does this really need to be in here?
+	// TODO: does this really need to be in here?
+	helpCommand := NewCommand("help", "Displays help messages.", func(ctx *MessageContext) {
+		_, m, c, s := ctx.GetVal()
 		cmdHelp, _ := c.GetParam(m.Content, "command")
 
 		if cmdHelp != "" {

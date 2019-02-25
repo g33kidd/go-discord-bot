@@ -7,7 +7,7 @@ import (
 )
 
 // NewCommand creates a new command and returns it!
-func NewCommand(sig string, desc string, handler commandHandlerFunc) *Command {
+func NewCommand(sig string, desc string, handler newCommandHandlerFunc) *Command {
 	cmd := &Command{}
 	cmd.Signature = sig
 	cmd.Description = desc

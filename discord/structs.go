@@ -28,6 +28,11 @@ type MessageContext struct {
 	Command *Command
 }
 
+// GetVal gets the values from MessageContext... this makes it easier to extract the info when all are needed.
+func (c *MessageContext) GetVal() (b *Bot, m *dgo.MessageCreate, cmd *Command, s *dgo.Session) {
+	return c.Bot, c.Message, c.Command, c.Session
+}
+
 // Command : this is a command...
 type Command struct {
 	Signature   string
@@ -35,7 +40,7 @@ type Command struct {
 	Prefix      string
 	Aliases     []string
 	Parameters  []*CommandParameter
-	Handler     commandHandlerFunc
+	Handler     newCommandHandlerFunc
 }
 
 // CommandParameter : Specifies the name, position and what this parameter does.
@@ -58,3 +63,4 @@ type Conversation struct {
 }
 
 type commandHandlerFunc func(s *dgo.Session, m *dgo.MessageCreate, c *Command)
+type newCommandHandlerFunc func(ctx *MessageContext)
