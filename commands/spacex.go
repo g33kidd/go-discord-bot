@@ -13,7 +13,8 @@ func sendErrorMessage(s *dgo.Session, c string, m string) {
 
 // NextLaunchCommand notifies the user when the next SpaceX Launch is going to be
 // using the SpaceX Data API.
-func NextLaunchCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
+func NextLaunchCommand(ctx *discord.MessageContext) {
+	_, m, _, s := ctx.GetVal()
 	spc := spx.New()
 	launch, err := spc.GetNextLaunch()
 	if err != nil {
@@ -30,7 +31,8 @@ func NextLaunchCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command)
 }
 
 // RocketInformationCommand does this...
-func RocketInformationCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
+func RocketInformationCommand(ctx *discord.MessageContext) {
+	_, m, c, s := ctx.GetVal()
 	rocketName, err := c.GetParam(m.Content, "name")
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, err.Error())

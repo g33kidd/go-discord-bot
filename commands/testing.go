@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	dgo "github.com/bwmarrin/discordgo"
 	dc "github.com/g33kidd/n00b/discord"
 )
 
 // MacroCommand does a macro thing
-func MacroCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+func MacroCommand(ctx *dc.MessageContext) {
+	_, m, c, s := ctx.GetVal()
 	content := m.Content
 
 	// TODO: Re-work this so that I can return nil for name or cmd1. Just requires returning it as a pointer.

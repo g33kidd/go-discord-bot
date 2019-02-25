@@ -42,7 +42,10 @@ func RegisterImageCommands(bot *dc.Bot) {
 
 // RegisterUtilityCommands registers the fun command group
 func RegisterUtilityCommands(bot *dc.Bot) {
-	// Things like /ban /kick, etc..
+	helpCommand := dc.NewCommand("help", "Displays help messages.", HelpCommand)
+	helpCommand.AddParameter("command", "Gets the help message for the command given, if there is one.", false)
+
+	bot.CmdHandler.AddCommand(helpCommand)
 }
 
 // RegisterTestingCommands for testing stuff

@@ -11,7 +11,8 @@ import (
 )
 
 // TwitchChannelEditCommand edits the twitch channel!
-func TwitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
+func TwitchChannelEditCommand(ctx *discord.MessageContext) {
+	_, m, c, s := ctx.GetVal()
 	ch := twitch.GetMyChannel()
 
 	game, err := c.GetParam(m.Content, "game")
@@ -39,7 +40,8 @@ func TwitchChannelEditCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.C
 }
 
 // TwitchChannelInfoCommand edits the twitch channel!
-func TwitchChannelInfoCommand(s *dgo.Session, m *dgo.MessageCreate, c *discord.Command) {
+func TwitchChannelInfoCommand(ctx *discord.MessageContext) {
+	_, m, c, s := ctx.GetVal()
 	channel, err := c.GetParam(m.Content, "channel")
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "I need the `channel` param. Try `$help twitch` for more info.")

@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	dgo "github.com/bwmarrin/discordgo"
 	dc "github.com/g33kidd/n00b/discord"
 )
 
@@ -17,16 +16,21 @@ type catImage struct {
 }
 
 // PingPongCommand does ping and pong!
-func PingPongCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
-	if c.Signature == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
+func PingPongCommand(ctx *dc.MessageContext) {
+	// You can use GetVal to extract some information from the Context, but you can also just
+	// use the values directly from the context.
+	// b, m, c, _ := ctx.GetVal()
+	if ctx.Command.Signature == "pong" {
+		ctx.Session.ChannelMessageSend(ctx.Message.ChannelID, "Ping!")
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
+		ctx.Session.ChannelMessageSend(ctx.Message.ChannelID, "Pong!")
 	}
 }
 
 // RandomCatCommand gives a random cat image
-func RandomCatCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+func RandomCatCommand(ctx *dc.MessageContext) {
+	_, m, _, s := ctx.GetVal()
+
 	resp, err := http.Get("http://thecatapi.com/api/images/get?format=xml&results_per_page=1")
 	if err != nil {
 		fmt.Println("Didnt get cat image!")
@@ -49,7 +53,8 @@ func RandomCatCommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
 }
 
 // APICommand does ping and pong!
-func APICommand(s *dgo.Session, m *dgo.MessageCreate, c *dc.Command) {
+func APICommand(ctx *dc.MessageContext) {
+	_, m, c, s := ctx.GetVal()
 	client := &http.Client{}
 	url, err := c.GetParam(m.Content, "url")
 	if err != nil {
